@@ -1,0 +1,69 @@
+A malicious actor who does not have direct admin rights and cannot install Python, but has remote access to a computer via a C2 (Command & Control) server, would face some limitations in running the minifilter enumeration code. Here’s how they might adapt their approach:
+
+1. Why Admin Rights Matter
+Enumerating minifilters via the Filter Manager API (fltlib.dll) usually requires administrator privileges. Non-admin users may not have permission to query kernel-level driver information.
+Without admin rights, the direct approach (like the provided C code or its Python translation) will likely fail or return incomplete data.
+2. Alternative Methods Without Admin Rights
+A. Indirect Methods
+Malicious actors might use alternative ways to detect AV/software presence:
+
+i. Query the Registry
+Many security products and minifilter drivers register information in the Windows Registry, particularly in:
+
+HKLM\SYSTEM\CurrentControlSet\Services
+HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall
+HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run
+They could use built-in Windows commands (e.g., reg query) via remote shell access:
+
+Shell
+reg query HKLM\SYSTEM\CurrentControlSet\Services
+Look for service names associated with known AV products.
+
+ii. WMI (Windows Management Instrumentation)
+WMI can sometimes enumerate installed drivers and software:
+
+Shell
+wmic product get name
+wmic service list brief
+Or use a PowerShell command:
+
+PowerShell
+Get-WmiObject -Class Win32_SystemDriver | Select-Object DisplayName,Name,State
+B. Living Off the Land
+Malicious actors often use built-in Windows tools to avoid detection and needing to install anything:
+
+i. PowerShell Scripts
+PowerShell is available on most modern Windows systems:
+
+PowerShell
+Get-ChildItem -Path "HKLM:\SYSTEM\CurrentControlSet\Services" | Where-Object { $_.Name -like "*mini*" }
+Or list running processes and services:
+
+PowerShell
+Get-Service
+Get-Process
+ii. C2 Fileless Execution
+If the attacker can upload files, they may:
+
+Upload a pre-compiled C executable (like the original code) and run it if they can execute binaries.
+Use fileless techniques: execute commands directly in memory or via PowerShell, WMI, or scheduled tasks.
+3. Remote Execution from C2
+The attacker would issue commands from their C2 to the victim’s machine.
+They’d use whatever means are available (batch scripts, PowerShell, WMI, registry queries) to gather info.
+Results would be sent back to the C2 for analysis.
+4. Summary Table
+Method	Requires Admin	Needs Python	Needs File Upload	Stealth
+C code via Filter Manager	Yes	No	Yes	Low
+Registry Query	No*	No	No	High
+WMI / PowerShell	No*	No	No	High
+Process/Service Listing	No	No	No	High
+Fileless PowerShell	No*	No	No	High
+* Some registry keys or driver info may require admin rights, but much can be gathered without it.
+
+Conclusion
+A malicious actor without admin rights and without Python would not use the provided code directly. Instead, they would:
+
+Use native Windows tools (Registry query, WMI, PowerShell, service/process enumeration).
+Run these commands from their remote C2 shell.
+Collect and analyze the output to identify AV/minifilter presence.
+If you want examples of specific commands or scripts for these methods, let me know!
