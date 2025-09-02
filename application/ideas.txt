@@ -1,0 +1,13 @@
+command ideas
+
+1. chrome password extractor
+2. encryption key changer
+3. most active files detector
+4. basic shell command runner
+5. file uploader 
+6. keylogger [with active application data]
+7. antivirus detector
+8. [unclear]system forensic tool 
+9. onedrive logs C:\Users\<USER>\AppData\Local\Microsoft\OneDrive\logs\ analyzer
+10. last online time finder
+11. built in shell script to get hold of autodatasaverof all data
