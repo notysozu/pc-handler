@@ -1,7 +1,7 @@
+require('dotenv').config();
 const { Client, Collection, Partials } = require("discord.js");
 const CommandsHandler = require("./handler/CommandsHandler");
 const { warn, error, info, success } = require("../utils/Console");
-const config = require("../config");
 const CommandsListener = require("./handler/CommandsListener");
 const ComponentsHandler = require("./handler/ComponentsHandler");
 const ComponentsListener = require("./handler/ComponentsListener");
@@ -32,7 +32,7 @@ class DiscordBot extends Client {
     commands_handler = new CommandsHandler(this);
     components_handler = new ComponentsHandler(this);
     events_handler = new EventsHandler(this);
-    database = new QuickYAML(config.database.path);
+    database = new QuickYAML(process.env.DATABASE_PATH);
 
     constructor() {
         super({
@@ -71,15 +71,15 @@ class DiscordBot extends Client {
         this.login_timestamp = Date.now();
 
         try {
-            await this.login(process.env.CLIENT_TOKEN);
+            await this.login(process.env.DISCORD_BOT_TOKEN);
             this.commands_handler.load();
             this.components_handler.load();
             this.events_handler.load();
             this.startStatusRotation();
 
             warn('Attempting to register application commands... (this might take a while!)');
-            await this.commands_handler.registerApplicationCommands(config.development);
-            success('Successfully registered application commands. For specific guild? ' + (config.development.enabled ? 'Yes' : 'No'));
+            await this.commands_handler.registerApplicationCommands(process.env.DEV_ENABLED);
+            success('Successfully registered application commands. For specific guild? ' + (process.env.DEV_ENABLED.enabled ? 'Yes' : 'No'));
         } catch (err) {
             error('Failed to connect to the Discord bot, retrying...');
             error(err);
