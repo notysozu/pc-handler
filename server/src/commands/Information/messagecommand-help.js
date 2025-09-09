@@ -1,7 +1,7 @@
+require("dotenv").config();
 const { Message } = require("discord.js");
 const DiscordBot = require("../../client/DiscordBot");
 const MessageCommand = require("../../structure/MessageCommand");
-const config = require("../../config");
 
 module.exports = new MessageCommand({
     command: {
@@ -19,8 +19,18 @@ module.exports = new MessageCommand({
      * @param {string[]} args
      */
     run: async (client, message, args) => {
+        // Fallback prefix if not set in DB
+        const defaultPrefix = process.env.COMMAND_PREFIX || "!";
+
+        const replyText = client.collection.message_commands
+            .map((cmd) => {
+                const prefix = client.database.ensure(`prefix-${message.guild.id}`, defaultPrefix);
+                return `\`${prefix}${cmd.command.name}\``;
+            })
+            .join(", ");
+
         await message.reply({
-            content: `${client.collection.message_commands.map((cmd) => '\`' + client.database.ensure('prefix-' + message.guild.id, config.commands.prefix) + cmd.command.name + '\`').join(', ')}`
+            content: replyText || (process.env.MSG_HELP_EMPTY || "⚠️ No commands available.")
         });
     }
 }).toJSON();

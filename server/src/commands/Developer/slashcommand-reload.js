@@ -1,7 +1,7 @@
+require("dotenv").config();
 const { ChatInputCommandInteraction, AttachmentBuilder } = require("discord.js");
 const DiscordBot = require("../../client/DiscordBot");
 const ApplicationCommand = require("../../structure/ApplicationCommand");
-const config = require("../../config");
 
 module.exports = new ApplicationCommand({
     command: {
@@ -24,18 +24,20 @@ module.exports = new ApplicationCommand({
         try {
             client.commands_handler.reload();
 
-            await client.commands_handler.registerApplicationCommands(config.development);
+            // Use env var for dev mode toggle
+            const isDev = process.env.DEV_ENABLED === "true";
+            await client.commands_handler.registerApplicationCommands(isDev);
 
             await interaction.editReply({
-                content: 'Successfully reloaded application commands and message commands.'
+                content: process.env.MSG_RELOAD_SUCCESS || '✅ Successfully reloaded application commands and message commands.'
             });
         } catch (err) {
             await interaction.editReply({
-                content: 'Something went wrong.',
+                content: process.env.MSG_RELOAD_FAIL || '❌ Something went wrong.',
                 files: [
                     new AttachmentBuilder(Buffer.from(`${err}`, 'utf-8'), { name: 'output.ts' })
                 ]
             });
-        };
+        }
     }
 }).toJSON();

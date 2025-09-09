@@ -1,7 +1,7 @@
+require("dotenv").config();
 const { AttachmentBuilder, Message } = require("discord.js");
 const DiscordBot = require("../../client/DiscordBot");
 const MessageCommand = require("../../structure/MessageCommand");
-const config = require("../../config");
 
 module.exports = new MessageCommand({
     command: {
@@ -20,24 +20,26 @@ module.exports = new MessageCommand({
      */
     run: async (client, message, args) => {
         message = await message.reply({
-            content: 'Please wait...'
+            content: process.env.MSG_RELOAD_WAIT || '⏳ Please wait...'
         });
 
         try {
             client.commands_handler.reload();
 
-            await client.commands_handler.registerApplicationCommands(config.development);
+            // Use env var for development mode toggle
+            const isDev = process.env.DEV_ENABLED === "true";
+            await client.commands_handler.registerApplicationCommands(isDev);
 
             await message.edit({
-                content: 'Successfully reloaded application commands and message commands.'
+                content: process.env.MSG_RELOAD_SUCCESS || '✅ Successfully reloaded application commands and message commands.'
             });
         } catch (err) {
             await message.edit({
-                content: 'Something went wrong.',
+                content: process.env.MSG_RELOAD_FAIL || '❌ Something went wrong.',
                 files: [
                     new AttachmentBuilder(Buffer.from(`${err}`, 'utf-8'), { name: 'output.ts' })
                 ]
             });
-        };
+        }
     }
 }).toJSON();

@@ -1,10 +1,33 @@
 const { Message } = require("discord.js");
 const MessageCommand = require("../../structure/MessageCommand");
 const ApplicationCommand = require("../../structure/ApplicationCommand");
-const config = require("../../config");
+
+// Load environment variables
+require("dotenv").config();
 
 const application_commands_cooldown = new Map();
 const message_commands_cooldown = new Map();
+
+// Helper: get array from env (comma separated values)
+const parseEnvArray = (key) => {
+    const val = process.env[key];
+    return val ? val.split(",").map(v => v.trim()) : [];
+};
+
+// Env-based config
+const envConfig = {
+    users: {
+        ownerId: process.env.OWNER_ID,
+        developers: parseEnvArray("DEVELOPER_IDS") // example: "123,456,789"
+    },
+    messages: {
+        NOT_BOT_OWNER: process.env.MSG_NOT_BOT_OWNER || "❌ Only the bot owner can use this command.",
+        NOT_BOT_DEVELOPER: process.env.MSG_NOT_BOT_DEVELOPER || "❌ Only bot developers can use this command.",
+        NOT_GUILD_OWNER: process.env.MSG_NOT_GUILD_OWNER || "❌ Only the server owner can use this command.",
+        CHANNEL_NOT_NSFW: process.env.MSG_CHANNEL_NOT_NSFW || "⚠️ This command can only be used in NSFW channels.",
+        GUILD_COOLDOWN: process.env.MSG_GUILD_COOLDOWN || "⏳ Please wait %cooldown%s before reusing this command."
+    }
+};
 
 /**
  * 
@@ -15,23 +38,21 @@ const message_commands_cooldown = new Map();
  */
 const handleApplicationCommandOptions = async (interaction, options, command) => {
     if (options.botOwner) {
-        if (interaction.user.id !== config.users.ownerId) {
+        if (interaction.user.id !== envConfig.users.ownerId) {
             await interaction.reply({
-                content: config.messages.NOT_BOT_OWNER,
+                content: envConfig.messages.NOT_BOT_OWNER,
                 ephemeral: true
             });
-
             return false;
         }
     }
 
     if (options.botDevelopers) {
-        if (config.users?.developers?.length > 0 && !config.users?.developers?.includes(interaction.user.id)) {
+        if (envConfig.users.developers.length > 0 && !envConfig.users.developers.includes(interaction.user.id)) {
             await interaction.reply({
-                content: config.messages.NOT_BOT_DEVELOPER,
+                content: envConfig.messages.NOT_BOT_DEVELOPER,
                 ephemeral: true
             });
-
             return false;
         }
     }
@@ -39,25 +60,21 @@ const handleApplicationCommandOptions = async (interaction, options, command) =>
     if (options.guildOwner) {
         if (interaction.user.id !== interaction.guild.ownerId) {
             await interaction.reply({
-                content: config.messages.NOT_GUILD_OWNER,
+                content: envConfig.messages.NOT_GUILD_OWNER,
                 ephemeral: true
             });
-
             return false;
         }
     }
 
     if (options.cooldown) {
         const cooldownFunction = () => {
-            let data = application_commands_cooldown.get(interaction.user.id);
-
+            let data = application_commands_cooldown.get(interaction.user.id) || [];
             data.push(interaction.commandName);
-
             application_commands_cooldown.set(interaction.user.id, data);
 
             setTimeout(() => {
-                let data = application_commands_cooldown.get(interaction.user.id);
-
+                let data = application_commands_cooldown.get(interaction.user.id) || [];
                 data = data.filter((v) => v !== interaction.commandName);
 
                 if (data.length <= 0) {
@@ -66,17 +83,16 @@ const handleApplicationCommandOptions = async (interaction, options, command) =>
                     application_commands_cooldown.set(interaction.user.id, data);
                 }
             }, options.cooldown);
-        }
+        };
 
         if (application_commands_cooldown.has(interaction.user.id)) {
             let data = application_commands_cooldown.get(interaction.user.id);
 
             if (data.some((cmd) => cmd === interaction.commandName)) {
                 await interaction.reply({
-                    content: config.messages.GUILD_COOLDOWN.replace(/%cooldown%/g, options.cooldown / 1000),
+                    content: envConfig.messages.GUILD_COOLDOWN.replace(/%cooldown%/g, options.cooldown / 1000),
                     ephemeral: true
                 });
-
                 return false;
             } else {
                 cooldownFunction();
@@ -88,7 +104,7 @@ const handleApplicationCommandOptions = async (interaction, options, command) =>
     }
 
     return true;
-}
+};
 
 /**
  * 
@@ -99,21 +115,19 @@ const handleApplicationCommandOptions = async (interaction, options, command) =>
  */
 const handleMessageCommandOptions = async (message, options, command) => {
     if (options.botOwner) {
-        if (message.author.id !== config.users.ownerId) {
+        if (message.author.id !== envConfig.users.ownerId) {
             await message.reply({
-                content: config.messages.NOT_BOT_OWNER
+                content: envConfig.messages.NOT_BOT_OWNER
             });
-
             return false;
         }
     }
 
     if (options.botDevelopers) {
-        if (config.users?.developers?.length > 0 && !config.users?.developers?.includes(message.author.id)) {
+        if (envConfig.users.developers.length > 0 && !envConfig.users.developers.includes(message.author.id)) {
             await message.reply({
-                content: config.messages.NOT_BOT_DEVELOPER
+                content: envConfig.messages.NOT_BOT_DEVELOPER
             });
-
             return false;
         }
     }
@@ -121,9 +135,8 @@ const handleMessageCommandOptions = async (message, options, command) => {
     if (options.guildOwner) {
         if (message.author.id !== message.guild.ownerId) {
             await message.reply({
-                content: config.messages.NOT_GUILD_OWNER
+                content: envConfig.messages.NOT_GUILD_OWNER
             });
-
             return false;
         }
     }
@@ -131,24 +144,20 @@ const handleMessageCommandOptions = async (message, options, command) => {
     if (options.nsfw) {
         if (!message.channel.nsfw) {
             await message.reply({
-                content: config.messages.CHANNEL_NOT_NSFW
+                content: envConfig.messages.CHANNEL_NOT_NSFW
             });
-
             return false;
         }
     }
 
     if (options.cooldown) {
         const cooldownFunction = () => {
-            let data = message_commands_cooldown.get(message.author.id);
-
+            let data = message_commands_cooldown.get(message.author.id) || [];
             data.push(command.name);
-
             message_commands_cooldown.set(message.author.id, data);
 
             setTimeout(() => {
-                let data = message_commands_cooldown.get(message.author.id);
-
+                let data = message_commands_cooldown.get(message.author.id) || [];
                 data = data.filter((cmd) => cmd !== command.name);
 
                 if (data.length <= 0) {
@@ -157,16 +166,15 @@ const handleMessageCommandOptions = async (message, options, command) => {
                     message_commands_cooldown.set(message.author.id, data);
                 }
             }, options.cooldown);
-        }
+        };
 
         if (message_commands_cooldown.has(message.author.id)) {
             let data = message_commands_cooldown.get(message.author.id);
 
             if (data.some((v) => v === command.name)) {
                 await message.reply({
-                    content: config.messages.GUILD_COOLDOWN.replace(/%cooldown%/g, options.cooldown / 1000)
+                    content: envConfig.messages.GUILD_COOLDOWN.replace(/%cooldown%/g, options.cooldown / 1000)
                 });
-
                 return false;
             } else {
                 cooldownFunction();
@@ -178,6 +186,6 @@ const handleMessageCommandOptions = async (message, options, command) => {
     }
 
     return true;
-}
+};
 
-module.exports = { handleApplicationCommandOptions, handleMessageCommandOptions }
+module.exports = { handleApplicationCommandOptions, handleMessageCommandOptions };

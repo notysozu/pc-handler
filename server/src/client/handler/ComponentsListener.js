@@ -1,6 +1,6 @@
 const DiscordBot = require("../DiscordBot");
-const config = require("../../config");
 const { error } = require("../../utils/Console");
+require("dotenv").config();
 
 class ComponentsListener {
     /**
@@ -12,7 +12,7 @@ class ComponentsListener {
             const checkUserPermissions = async (component) => {
                 if (component.options?.public === false && interaction.user.id !== interaction.message.interaction.user.id) {
                     await interaction.reply({
-                        content: config.messages.COMPONENT_NOT_PUBLIC,
+                        content: process.env.MSG_COMPONENT_NOT_PUBLIC || "⚠️ This component is not public.",
                         ephemeral: true
                     });
 
@@ -20,7 +20,7 @@ class ComponentsListener {
                 }
 
                 return true;
-            }
+            };
 
             try {
                 if (interaction.isButton()) {
