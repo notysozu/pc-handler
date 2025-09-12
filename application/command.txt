@@ -1,94 +1,94 @@
 [
-function name:
+function name:chrm_pwd
 aliases:
-use:
-input:
-output:
+use:checks the folder structures and finds the chrome password from rabbit's computer
+input: nill
+output: chrome passwords
 ]
 
 
 [
-function name:
-aliases:
-use:
-input:
-output:
+function name: >>
+aliases:shell
+use:runs custom shell command on the terminal
+input: global, any input acceptable
+output:system output / error message
 ]
 
 [
-function name:
-aliases:
-use:
-input:
-output:
+function name:fl_upldr
+aliases:file uploader
+use:uploads local file to a third party HDD storage for easy access and download from the mian attacker servr
+input: PATH
+output: status code [True, False based on successful attempt also presents error message]
 ]
 
 [
-function name:
-aliases:
-use:
-input:
-output:
+function name:DTCT
+aliases:most active file detector
+use:detects the most active files used by the person [windows based command] - at the verystart of code will check if windows or not
+input:detects the most active files in the victim machine
+output:python list with filenames
 ]
 
 [
-function name:
-aliases:
-use:
-input:
-output:
+function name:KYLGR
+aliases:keylogger
+use:starts a keylogger in the victim machine, which records the keystroke at victim machine, either save the file at a location adnd upload it to a server or search through [keylogger along with device current applic info and device no]
+input: time interval and type of output [eg: KYLGR 20hrs upld / regex code]
+output:system output message of either success or failure
 ]
 
 [
-function name:
-aliases:
-use:
-input:
-output:
+function name:ANT_VRS
+aliases:DETECTS ANTIVIRUS ON WINDOW SYSTEMS
+use:checks if a computer is windows first if yes then checks something to detect antivurus installed on vtm machine
+input:null
+output: csv names
 ]
 
 [
-function name:
-aliases:
-use:
-input:
-output:
+function name:SYS_INFO
+aliases:system info finder
+use:finds system info such as ram, storage, last online, software type, time, 
+input: nill
+output:gives the info
 ]
 
 [
-function name:
-aliases:
-use:
-input:
-output:
+function name:SHL_SCRPT
+aliases:shell script
+use:finds shell script on local server or online github or other places to download and run, need to make a craiglist like platform for this  
+input: 'path'
+output:system message
 ]
 
 [
-function name:
-aliases:
-use:
-input:
-output:
+function name:USG_TIME
+aliases:usage time
+use:collects data on usage pattery like which parts of the day a person uses the laptop
+input:nill
+output:a 24 hr dial sheet collected using 5 days data [timer based applic responds back after some time]
 ]
 
 [
-function name:
-aliases:
-use:
-input:
-output:
+function name:POISN
+aliases:poisom
+use:finds most active app deletes their logos from taskbar and other popular areas [makes you choose which app to poison]
+input:option 2 step command
+output:done/  error prompt
 ]
 
 [
-function name:
-aliases:
-use:
-input:
-output:
+function name:SLDWN
+aliases:slows down
+use:slows down ui such that ui becomes un interactive ebut background server runs
+input:nill
+output:started, done
 ]
 [
-function name:
-aliases:
+function name:SHFL
+aliases:shuffles the code and folder structure and names such that everything remains untouchable
 use:
 input:
 output:
