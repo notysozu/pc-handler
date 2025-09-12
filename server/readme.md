@@ -25,7 +25,7 @@ This ensures smooth communication between the **user interface (Node.js/Discord)
 ## 🔄 Workflow
 1. **User Interaction**  
    - A command or button press triggers the Node.js server.  
-   - Example: `/run task` → Node.js writes `"task": "pending"` to the database.
+   - Example: `/runtask <TASK>` → Node.js writes `"<TASK>": "pending"` to the database.
 
 2. **Database Update**  
    - Node.js updates the Firebase/Firestore/Discord DB entry with request data.
